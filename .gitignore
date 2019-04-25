@@ -1,0 +1,9 @@
+.idea/
+.vscode/
+*.zip
+*.cfg
+data/video/
+data/image/
+data/content/
+
+__pycache__/

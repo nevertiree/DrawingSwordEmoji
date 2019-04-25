@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+
+import os
+
+import numpy as np
+import cv2 as cv
+
+
+def extract_edge(image_file, is_show=False):
+    """ Finds edges in an image using the Canny algorithm.
+        :param image_file: str
+        :return:
+    """
+
+    if isinstance(image_file, str):
+        img = cv.imread(image_file)
+    else:
+        img = image_file
+    gray_img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
+    img = cv.Canny(gray_img, 800, 1000)
+
+    if is_show:
+        cv.imshow("frame", img)
+        cv.waitKey()
+        cv.destroyAllWindows()
+
+    return img
+
+
+def has_subtitle(image_file):
+
+    image_edge = extract_edge(image_file)
+    mapped_image_edge = np.sum(image_edge, axis=1)
+
+    quad_len = int(0.25 * len(mapped_image_edge))
+
+    upper_part_value = sum(mapped_image_edge[:quad_len])
+    lower_part_value = sum(mapped_image_edge[quad_len:])
+
+    # print(upper_part_value)
+    # print(lower_part_value)
+
+    return lower_part_value > upper_part_value * 5
+
+
+def batch_detect():
+    image_dir = "../image"
+
+    for image_name in os.listdir(image_dir):
+        print(image_name, has_subtitle(os.path.join(image_dir, image_name)))
+
+
+if __name__ == '__main__':
+    batch_detect()
