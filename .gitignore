@@ -5,5 +5,7 @@
 data/video/
 data/image/
 data/content/
+tempCodeRunnerFile.py
+baidu_api.ini
 
 __pycache__/

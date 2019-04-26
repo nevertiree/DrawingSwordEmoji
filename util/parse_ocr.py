@@ -4,17 +4,17 @@
 
 import os
 import json
-import ConfigParser
+import configparser
 
 from aip import AipOcr  # http://ai.baidu.com/docs#/OCR-Python-SDK/80d64770
 
-CONFIG_FILE = "baidu_api.cfg"
-config = ConfigParser.ConfigParser()
-config.read(CONFIG_FILE)
+CONFIG_FILE = 'baidu_api.ini'
+config = configparser.ConfigParser()
+config.read(os.path.join(os.getcwd(),'util', 'baidu_api.ini'))
 
-APP_ID = config.get("BAIDU_OCR", "APP_ID") 
-API_KEY = config.get("BAIDU_OCR", "API_KEY")
-SECRET_KEY = config.get("BAIDU_OCR", "SECRET_KEY") 
+APP_ID = config.get('BAIDU_OCR', 'APP_ID') 
+API_KEY = config.get('BAIDU_OCR', 'API_KEY')
+SECRET_KEY = config.get('BAIDU_OCR', 'SECRET_KEY') 
 
 client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 """
@@ -60,21 +60,21 @@ def basic_ocr(image):
 
     """ 如果有可选参数 """
     options = {"language_type": "CHN_ENG",
-               "detect_direction": "true",
-               "detect_language": "true",
-               "probability": "false"}
+               "detect_direction": "false",
+               "detect_language": "false",
+               "probability": "true"}
 
     """ 带参数调用通用文字识别, 图片参数为本地图片 """
     try:
-        return client.basicGeneral(image, options)['words_result']
+        return client.basicGeneral(image, options)
     except json.decoder.JSONDecodeError:
         return None
 
 
 if __name__ == '__main__':
 
-    image_dir = "../data/image"
-    content_dir = "../data/content"
+    image_dir = os.path.join(os.getcwd(), "data", "image")
+    content_dir = os.path.join(os.getcwd(), "data", "content")
 
     for image_sub_dir in os.listdir(image_dir):  
         # Open image sub-dir, eg: 01/ 02/ 03/ ...
@@ -91,29 +91,29 @@ if __name__ == '__main__':
                 for line in csv_file:
                     last_line = line
             if last_line:  # Find the last parsed image.
-                restart_point = last_line.split(",")[0]  
+                print(last_line)
+                restart_point = json.loads(last_line)["log_id"]
+        print(restart_point)
 
         """ Parse screenshot image via baidu OCR API """
         for image_name in os.listdir(os.path.join(image_dir, image_sub_dir)):
 
             # Skip current image, if it has been parsed.
             if restart_point:
-                if restart_point >= image_name:
+                if restart_point >= image_name.split(".")[0]:
                     continue
 
             # Call baidu OCR API
             image = get_file_content(os.path.join(image_dir, image_sub_dir, image_name))
-            ocr_result_list = basic_ocr(image)
+            ocr_result = basic_ocr(image)
 
             # If OCR result is not None.
-            if ocr_result_list:
+            if ocr_result and ocr_result["words_result_num"] > 0:
                 try:
                     with open(content_file, 'a+', encoding="utf-8") as f:
-                        line = [str(image_name)]
-                        for result in ocr_result_list:
-                            line.append(result['words'])
-                        line = ",".join(line) + "\n"
-                        print(line)
-                        f.write(line)
+                        ocr_result["log_id"] = image_name.split(".")[0]
+                        result_str = json.dumps(ocr_result, ensure_ascii=False)
+                        print(result_str + "\n")
+                        f.write(result_str + "\n")
                 except UnicodeEncodeError:
                     pass
