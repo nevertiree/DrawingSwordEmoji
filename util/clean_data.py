@@ -34,7 +34,7 @@ def de_duplication(origin_file, output_file):
                     result_word_list = []
 
                     for word_item in word_list:
-                        if contain_zh(word_item["words"]) and float(word_item["probability"]["average"]) > 0.8:
+                        if contain_zh(word_item["words"]) and float(word_item["probability"]["average"]) > 0.6:
                             result_word_list.append(word_item)
 
                     if len(result_word_list) > 0:
@@ -51,7 +51,7 @@ def de_duplication(origin_file, output_file):
                     # 如果不含中文
                     print("Not contain cn.")
                     current_line_dict = previous_line_dict  # Drop current line
-                elif float(current_line_dict["words_result"][0]["probability"]["average"]) < 0.8:
+                elif float(current_line_dict["words_result"][0]["probability"]["average"]) < 0.6:
                     print("Word prob < 0.8")
                     current_line_dict = previous_line_dict  # Drop current line
                 else:
@@ -97,4 +97,4 @@ def contain_zh(word):
 
 if __name__ == "__main__":
     de_duplication(r"C:\Users\mi\Documents\Workspace\DrawingSword\data\content\ocr_result.csv",
-        r"C:\Users\mi\Documents\Workspace\DrawingSword\data\content\ocr_result_3.csv")
+                r"C:\Users\mi\Documents\Workspace\DrawingSword\data\content\ocr_result_4.csv")

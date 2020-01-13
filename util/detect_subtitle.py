@@ -49,6 +49,24 @@ def batch_detect():
     for image_name in os.listdir(image_dir):
         print(image_name, has_subtitle(os.path.join(image_dir, image_name)))
 
+def frame_similiar(image_file_1, image_file_2):
+    img_1 = cv.imread(image_file_1)
+    img_2 = cv.imread(image_file_2)
+
+    # print(img_1) 
+    # print(img_2) 
+
+    shape = img_1.shape
+    print(np.product(shape))
+    diff_count = np.sum(img_1 - img_2)
+    print(diff_count)
+    print(diff_count/shape)
+    # return img_1 == img_2
 
 if __name__ == '__main__':
-    batch_detect()
+    # batch_detect()
+    print(frame_similiar(r"C:\Users\mi\Documents\Workspace\DrawingSword\data\image\01\01_04750.jpg", 
+        # r"C:\Users\mi\Documents\Workspace\DrawingSword\data\image\01\01_04775.jpg",
+        r"C:\Users\mi\Documents\Workspace\DrawingSword\data\image\03\03_03125.jpg"
+        # r"C:\Users\mi\Documents\Workspace\DrawingSword\data\image\01\01_04775.jpg",
+    ))
