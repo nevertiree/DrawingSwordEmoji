@@ -10,7 +10,7 @@ from aip import AipOcr  # http://ai.baidu.com/docs#/OCR-Python-SDK/80d64770
 
 CONFIG_FILE = 'baidu_api.ini'
 config = configparser.ConfigParser()
-config.read(os.path.join(os.getcwd(),'util', 'baidu_api.ini'))
+config.read(os.path.join(os.getcwd(), 'util', 'baidu_api.ini'))
 
 APP_ID = config.get('BAIDU_OCR', 'APP_ID') 
 API_KEY = config.get('BAIDU_OCR', 'API_KEY')
@@ -37,7 +37,7 @@ client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 """
 
 
-def get_file_content(file_path):
+def read_screenshot(file_path):
     """ 读取图片 """
     with open(file_path, 'rb') as fp:
         return fp.read()
@@ -71,19 +71,16 @@ def basic_ocr(image):
         return None
 
 
-if __name__ == '__main__':
+def online_ocr(screenshot_save_path, caption_save_path):
 
-    image_dir = os.path.join(os.getcwd(), "data", "image")
-    content_dir = os.path.join(os.getcwd(), "data", "content")
-
-    for image_sub_dir in os.listdir(image_dir):  
+    for screenshot_sub_dir in os.listdir(screenshot_save_path):
         # Open image sub-dir, eg: 01/ 02/ 03/ ...
-        print(image_sub_dir)
+        print(screenshot_sub_dir)
 
         # Write OCR result into a csv file.
-        content_file = os.path.join(content_dir, image_sub_dir+".csv")
+        content_file = os.path.join(caption_save_path, screenshot_sub_dir+".csv")
 
-        # If the programm crash, let it restart.
+        # 断点续传
         restart_point = None
         if os.path.exists(content_file):
             last_line = None
@@ -95,17 +92,18 @@ if __name__ == '__main__':
                 restart_point = json.loads(last_line)["log_id"]
         print(restart_point)
 
-        """ Parse screenshot image via baidu OCR API """
-        for image_name in os.listdir(os.path.join(image_dir, image_sub_dir)):
+        """ Parse screenshot image via OCR API """
+        for image_name in os.listdir(os.path.join(screenshot_save_path, screenshot_sub_dir)):
 
             # Skip current image, if it has been parsed.
             if restart_point:
-                if restart_point >= image_name.split(".")[0]:
+                if restart_point >= "_".join(image_name.split(".")[:-1]):
                     continue
 
-            # Call baidu OCR API
-            image = get_file_content(os.path.join(image_dir, image_sub_dir, image_name))
-            ocr_result = basic_ocr(image)
+            # 读取图片
+            screenshot_object = read_screenshot(os.path.join(screenshot_save_path, screenshot_sub_dir, image_name))
+            # 调用百度API
+            ocr_result = basic_ocr(screenshot_object)
 
             # If OCR result is not None.
             if ocr_result and ocr_result["words_result_num"] > 0:

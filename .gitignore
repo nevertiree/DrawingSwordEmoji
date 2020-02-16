@@ -2,10 +2,13 @@
 .vscode/
 *.zip
 *.cfg
+video
+snapshot
 data/video/
 data/image/
 data/content/
 tempCodeRunnerFile.py
 baidu_api.ini
+caption
 
 __pycache__/
