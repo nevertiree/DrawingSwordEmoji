@@ -5,6 +5,8 @@ import os
 import numpy as np
 import cv2 as cv
 
+import matplotlib.pyplot as plt
+
 
 def extract_edge(image_file, is_show=False):
     """ Finds edges in an image using the Canny algorithm.
@@ -29,18 +31,22 @@ def extract_edge(image_file, is_show=False):
 
 def has_subtitle(image_file):
 
-    image_edge = extract_edge(image_file)
+    image_edge = extract_edge(image_file, False)
     mapped_image_edge = np.sum(image_edge, axis=1)
+    # print(len(mapped_image_edge))
+    # fig = plt.plot(mapped_image_edge)
+    # plt.show()
 
     quad_len = int(0.25 * len(mapped_image_edge))
 
     upper_part_value = sum(mapped_image_edge[:quad_len])
     lower_part_value = sum(mapped_image_edge[quad_len:])
 
-    # print(upper_part_value)
-    # print(lower_part_value)
-
-    return lower_part_value > upper_part_value * 5
+    # print(upper_part_value, lower_part_value)
+    if lower_part_value > upper_part_value * 5 and lower_part_value > 200000:
+        return True, lower_part_value
+    else:
+        return False, lower_part_value
 
 
 def batch_detect():
@@ -48,6 +54,7 @@ def batch_detect():
 
     for image_name in os.listdir(image_dir):
         print(image_name, has_subtitle(os.path.join(image_dir, image_name)))
+
 
 def frame_similiar(image_file_1, image_file_2):
     img_1 = cv.imread(image_file_1)
@@ -63,10 +70,9 @@ def frame_similiar(image_file_1, image_file_2):
     print(diff_count/shape)
     # return img_1 == img_2
 
+
 if __name__ == '__main__':
     # batch_detect()
-    print(frame_similiar(r"C:\Users\mi\Documents\Workspace\DrawingSword\data\image\01\01_04750.jpg", 
-        # r"C:\Users\mi\Documents\Workspace\DrawingSword\data\image\01\01_04775.jpg",
-        r"C:\Users\mi\Documents\Workspace\DrawingSword\data\image\03\03_03125.jpg"
-        # r"C:\Users\mi\Documents\Workspace\DrawingSword\data\image\01\01_04775.jpg",
-    ))
+    _, v1 = has_subtitle(cv.imread("sim_1.jpg"))
+    _, v2 = has_subtitle(cv.imread("sim_2.jpg"))
+    print(abs(v1-v2), v2 * 0.1)
